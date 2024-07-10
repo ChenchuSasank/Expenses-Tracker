@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Record Data</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Ensuring all form elements have the same large size */
+        form label,
+        form select,
+        form input,
+        form button {
+            width: 100%;
+            max-width: 400px; /* Adjust as needed for your design */
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            font-size: 1.2em;
+        }
+
+        form button {
+            width: auto;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Record Expense Data</h1>
+    <form id="recordForm">
+        <label for="expenseCategory">Expense Category:</label>
+        <select id="expenseCategory" name="expenseCategory" onchange="populateSubCategories()" required>
+            <option value="">Select Category</option>
+            <option value="Expense">Expense</option>
+            <!-- Add other categories if needed -->
+        </select>
+        <br>
+        <div id="subCategorySection" style="display: none;">
+            <label for="subCategory">Sub-Category:</label>
+            <select id="subCategory" name="subCategory" required>
+                <option value="">Select Sub-Category</option>
+                <option value="Medicals">Medicals</option>
+                <option value="Dining">Dining</option>
+                <option value="Vegetables">Vegetables</option>
+                <option value="Phone">Phone</option>
+                <option value="OTT">OTT</option>
+                <!-- Add other sub-categories if needed -->
+            </select>
+            <br>
+        </div>
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" name="amount" required>
+        <br>
+        <label for="remarks">Remarks:</label>
+        <input type="text" id="remarks" name="remarks">
+        <br>
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" required>
+        <br>
+        <button type="button" onclick="saveData()">Submit</button>
+    </form>
+    <button onclick="location.href='index.html'">Back</button>
+
+    <script>
+        function populateSubCategories() {
+            const selectedCategory = document.getElementById('expenseCategory').value;
+            const subCategorySection = document.getElementById('subCategorySection');
+            if (selectedCategory === 'Expense') {
+                subCategorySection.style.display = 'block';
+            } else {
+                subCategorySection.style.display = 'none';
+            }
+        }
+
+        function saveData() {
+            const expenseCategory = document.getElementById('expenseCategory').value;
+            const subCategory = document.getElementById('subCategory').value;
+            const amount = document.getElementById('amount').value;
+            const remarks = document.getElementById('remarks').value;
+            const date = document.getElementById('date').value;
+
+            if (!expenseCategory || !subCategory || !amount || !date) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+
+            const record = {
+                id: Date.now(),
+                expenseCategory,
+                subCategory,
+                amount,
+                remarks,
+                date
+            };
+
+            let expenseData = localStorage.getItem('expenseData');
+            expenseData = expenseData ? JSON.parse(expenseData) : [];
+            expenseData.push(record);
+            localStorage.setItem('expenseData', JSON.stringify(expenseData));
+
+            alert('Expense data recorded successfully!');
+            document.getElementById('recordForm').reset();
+            document.getElementById('subCategorySection').style.display = 'none'; // Hide sub-category section after submitting the form
+        }
+    </script>
+</body>
+</html>

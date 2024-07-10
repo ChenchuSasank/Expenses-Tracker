@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modify Data</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Ensuring all form elements have the same large size */
+        form label,
+        form select,
+        form input {
+            width: 100%;
+            max-width: 400px; /* Adjust as needed for your design */
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            font-size: 1.2em;
+        }
+
+        form button {
+            width: auto;
+            cursor: pointer;
+            padding: 10px 20px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Modify Expense Data</h1>
+    <form id="modifyForm">
+        <label for="expenseCategory">Expense Category:</label>
+        <select id="expenseCategory" name="expenseCategory" onchange="populateSubCategories()" required>
+            <option value="">Select Category</option>
+            <option value="Expense">Expense</option>
+        </select>
+        <br>
+        <div id="subCategorySection" style="display: none;">
+            <label for="subCategory">Sub-Category:</label>
+            <select id="subCategory" name="subCategory" required>
+                <option value="">Select Sub-Category</option>
+                <option value="Medicals">Medicals</option>
+                <option value="Dining">Dining</option>
+                <option value="Vegetables">Vegetables</option>
+                <option value="Phone">Phone</option>
+                <option value="OTT">OTT</option>
+            </select>
+            <br>
+        </div>
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" required>
+        <br>
+        <label for="remarks">Remarks:</label>
+        <input type="text" id="remarks" name="remarks" required>
+        <br>
+        <label for="newAmount">New Amount:</label>
+        <input type="number" id="newAmount" name="newAmount" required>
+        <br>
+        <button type="button" onclick="modifyData()">Modify</button>
+    </form>
+    <button onclick="location.href='index.html'">Back</button>
+
+    <script>
+        function populateSubCategories() {
+            const selectedCategory = document.getElementById('expenseCategory').value;
+            const subCategorySection = document.getElementById('subCategorySection');
+            if (selectedCategory === 'Expense') {
+                subCategorySection.style.display = 'block';
+            } else {
+                subCategorySection.style.display = 'none';
+            }
+        }
+
+        function modifyData() {
+            const expenseCategory = document.getElementById('expenseCategory').value;
+            const subCategory = document.getElementById('subCategory').value;
+            const date = document.getElementById('date').value;
+            const remarks = document.getElementById('remarks').value;
+            const newAmount = document.getElementById('newAmount').value;
+
+            if (!expenseCategory || !subCategory || !date || !remarks || !newAmount) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+
+            let expenseData = localStorage.getItem('expenseData');
+            expenseData = expenseData ? JSON.parse(expenseData) : [];
+
+            let recordFound = false;
+
+            expenseData = expenseData.map(record => {
+                if (record.expenseCategory === expenseCategory && record.subCategory === subCategory && record.date === date && record.remarks === remarks) {
+                    record.amount = newAmount;
+                    recordFound = true;
+                }
+                return record;
+            });
+
+            if (recordFound) {
+                localStorage.setItem('expenseData', JSON.stringify(expenseData));
+                alert('Expense data modified successfully!');
+                document.getElementById('modifyForm').reset();
+                document.getElementById('subCategorySection').style.display = 'none';
+            } else {
+                alert('No matching record found.');
+            }
+        }
+    </script>
+</body>
+</html>

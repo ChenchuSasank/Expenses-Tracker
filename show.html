@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Show Data</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Ensuring all form elements have the same large size */
+        form label,
+        form select,
+        form input,
+        form button,
+        .action-button {
+            width: 100%;
+            max-width: 400px; /* Adjust as needed for your design */
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            font-size: 1.2em;
+        }
+
+        form button,
+        .action-button {
+            width: auto;
+            cursor: pointer;
+        }
+
+        /* Style for the delete button to make it smaller */
+        .delete-button {
+            padding: 5px 10px;
+            font-size: 0.9em;
+        }
+
+        button {
+            width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Show Expense Data</h1>
+    <form id="filterForm">
+        <label for="expenseCategory">Expense Category:</label>
+        <select id="expenseCategory" name="expenseCategory" onchange="populateSubCategories()">
+            <option value="">Select Category</option>
+            <option value="Expense">Expense</option>
+        </select>
+        <br>
+        <div id="subCategorySection" style="display: none;">
+            <label for="subCategory">Sub-Category:</label>
+            <select id="subCategory" name="subCategory">
+                <option value="">Select Sub-Category</option>
+            </select>
+            <br>
+        </div>
+        <label for="dateFrom">From:</label>
+        <input type="date" id="dateFrom" name="dateFrom">
+        <br>
+        <label for="dateTo">To:</label>
+        <input type="date" id="dateTo" name="dateTo">
+        <br>
+        <button type="button" onclick="fetchData()">Filter Data</button>
+    </form>
+    <button onclick="location.href='index.html'">Back</button>
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Sub-Category</th>
+                <th>Amount</th>
+                <th>Remarks</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be dynamically populated -->
+        </tbody>
+    </table>
+
+    <script>
+        const categories = {
+            'Expense': ['Medicals', 'Dining', 'Vegetables', 'Phone', 'OTT']
+            // Add more categories and their sub-categories as needed
+        };
+
+        function populateSubCategories() {
+            const selectedCategory = document.getElementById('expenseCategory').value;
+            const subCategorySelect = document.getElementById('subCategory');
+            const subCategorySection = document.getElementById('subCategorySection');
+            const subCategories = categories[selectedCategory] || [];
+
+            subCategorySelect.innerHTML = '';
+            subCategorySelect.disabled = subCategories.length === 0;
+
+            if (subCategories.length > 0) {
+                subCategorySection.style.display = 'block';
+                subCategories.forEach(subCategory => {
+                    let option = document.createElement('option');
+                    option.value = subCategory;
+                    option.textContent = subCategory;
+                    subCategorySelect.appendChild(option);
+                });
+            } else {
+                subCategorySection.style.display = 'none';
+            }
+        }
+
+        function fetchData() {
+            const expenseCategory = document.getElementById('expenseCategory').value;
+            const subCategory = document.getElementById('subCategory').value;
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+
+            let expenseData = localStorage.getItem('expenseData');
+            expenseData = expenseData ? JSON.parse(expenseData) : [];
+
+            const filteredData = expenseData.filter(record => {
+                return (!expenseCategory || record.expenseCategory === expenseCategory) &&
+                       (!subCategory || record.subCategory === subCategory) &&
+                       (!dateFrom || new Date(record.date) >= new Date(dateFrom)) &&
+                       (!dateTo || new Date(record.date) <= new Date(dateTo));
+            });
+
+            const tableBody = document.querySelector('#dataTable tbody');
+            tableBody.innerHTML = '';
+
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6">No data found</td></tr>';
+            } else {
+                filteredData.forEach(record => {
+                    let row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${record.expenseCategory}</td>
+                        <td>${record.subCategory}</td>
+                        <td>${record.amount}</td>
+                        <td>${record.remarks}</td>
+                        <td>${record.date}</td>
+                        <td><button class="action-button delete-button" onclick="deleteRecord(${record.id})">Delete</button></td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+        }
+
+        function deleteRecord(id) {
+            let expenseData = localStorage.getItem('expenseData');
+            expenseData = expenseData ? JSON.parse(expenseData) : [];
+            expenseData = expenseData.filter(record => record.id !== id);
+            localStorage.setItem('expenseData', JSON.stringify(expenseData));
+            fetchData();
+        }
+    </script>
+</body>
+</html>
